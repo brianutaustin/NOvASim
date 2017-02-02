@@ -1,0 +1,44 @@
+/*This class is used to automatically build a single shashlik type module
+The function GetModule() returns the logical container of the entire module
+The logical and physical volumes for the block are l_block and p_block
+The logical and physical volumes for the fibers are l_fiber and p_fiber
+*/
+//This module is not complete!! it may be used as a starting point
+
+#ifndef shashlikModule_h
+#define shashlikModule_h
+
+#include "globals.hh"
+#include "G4Box.hh"
+#include "G4SubtractionSolid.hh"
+#include "G4UnionSolid.hh"
+#include "G4PVPlacement.hh"
+#include "G4LogicalVolume.hh"
+#include "G4Tubs.hh"
+
+class shashlikModule
+{
+ public:
+  shashlikModule(G4double,G4double,G4double,G4int,G4int,G4double,G4double);
+  ~shashlikModule();
+  
+ public:
+  G4LogicalVolume* GetModule() {return l_holder;}
+  G4LogicalVolume* GetLogicBlock(){return l_block;}
+  G4LogicalVolume* GetLogicFiber(){return l_fiber;}
+  G4VPhysicalVolume* GetPhysBlock(){return p_block;}
+  
+  
+ private:
+  G4Box *startbox;
+  G4SubtractionSolid *s_block;
+  G4UnionSolid *s_paint;
+  G4LogicalVolume *l_block;
+  G4VPhysicalVolume *p_block;
+  G4Tubs *s_fiber,*s_cladding,*s_core;
+  G4LogicalVolume *l_fiber,*l_cladding,*l_core;
+  G4VPhysicalVolume *p_fiber,*p_cladding,*p_core;
+  G4Box *s_holder;
+  G4LogicalVolume *l_holder;
+};
+#endif

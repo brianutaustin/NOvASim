@@ -1,0 +1,212 @@
+#include "novaSteppingAction.hh"
+#include "G4DynamicParticle.hh"
+#include "G4OpBoundaryProcess.hh"
+#include "G4Step.hh"
+#include "G4StepPoint.hh"
+#include "G4ProcessManager.hh"
+#include "G4Track.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4OpticalPhoton.hh"
+#include "novaRunAction.hh"
+#include "G4RunManager.hh"
+#include "G4EventManager.hh"
+#include "novaEventAction.hh"
+#include "iostream"
+#include "fstream"
+#include "G4Material.hh"
+#include "G4Trajectory.hh"
+#include "novaTrackInformation.hh"
+#include "G4SystemOfUnits.hh"
+
+
+novaSteppingAction::novaSteppingAction()
+{}
+novaSteppingAction::~novaSteppingAction()
+{}
+void novaSteppingAction::UserSteppingAction(const G4Step *aStep)
+{
+  
+  G4Track* theTrack = aStep->GetTrack();
+  Tally aTally;
+
+
+  if(0){//set to 1 to ignore generated photons
+    if(theTrack->GetDefinition()->GetParticleName()=="opticalphoton")
+      theTrack->SetTrackStatus(fStopAndKill);
+  }
+  
+  //The following lines are for debugging purposes
+  G4String partname=aStep->GetTrack()->GetDefinition()->GetParticleName();
+  if(partname=="opticalphoton"&&aStep->GetTrack()->GetUserInformation()==0) 
+    G4cout<<"Warning! No User info attached to photon!"<<G4endl;
+
+  //Get the Run and Event managers
+  //G4RunManager *runman = G4RunManager::GetRunManager();
+  //novaRunAction *runac = (novaRunAction*)runman->GetUserRunAction();
+  G4EventManager *evtman=G4EventManager::GetEventManager();
+  novaEventAction *evtac= (novaEventAction*)evtman->GetUserEventAction();
+  
+ 
+  //if more than 1 secondary is generated, update scintillation statistics
+  if(fpSteppingManager->GetfN2ndariesPostStepDoIt()>1){ 
+    evtac->AddGenerated(fpSteppingManager->GetfN2ndariesPostStepDoIt());
+    evtac->AddEdep(aStep->GetTotalEnergyDeposit()/MeV);
+  }
+  //check for bulk absorption and WL shifting
+  G4String endproc=aStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
+
+  novaTrackInformation* info=((novaTrackInformation*)(aStep->GetTrack()->GetUserInformation()));
+
+
+  G4double my_dist_after = aStep->GetTrack()->GetTrackLength()/mm;;
+  G4double my_wls_count;
+  my_wls_count = info->GetWLSCount();
+  //    G4cout << "WLScount is " << my_wls_count << G4endl;
+
+  if(endproc=="OpAbsorption"){
+    evtac->CountBulkAbs();
+ }
+
+  else if (endproc=="OpWLS"){
+    //    G4cout << "WLScount is " << my_wls_count << G4endl;
+
+    evtac->CountWLS();
+    //    if (my_wls_count > 0){
+      my_dist_after = my_dist_after + aStep->GetTrack()->GetTrackLength()/mm;
+      //    }
+
+
+}
+  else if(partname=="opticalphoton"&&endproc!="Transportation")
+    G4cout<<endproc<<G4endl;
+  
+  
+  
+  //find the boundary status
+  G4OpBoundaryProcessStatus boundaryStatus=Undefined;
+  static G4OpBoundaryProcess* boundary=NULL;
+  
+  //find the boundary process only once
+  if(!boundary){
+    G4ProcessManager* pm 
+      = aStep->GetTrack()->GetDefinition()->GetProcessManager();
+    G4int nprocesses = pm->GetProcessListLength();
+    G4ProcessVector* pv = pm->GetProcessList();
+    G4int i;
+    for( i=0;i<nprocesses;i++){
+      if((*pv)[i]->GetProcessName()=="OpBoundary"){
+	boundary = (G4OpBoundaryProcess*)(*pv)[i];
+	break;
+      }
+    }
+  }
+   G4ParticleDefinition* particleType = aStep->GetTrack()->GetDefinition();
+  if(particleType==G4OpticalPhoton::OpticalPhotonDefinition()){
+    //query the boundary status
+    boundaryStatus=boundary->GetStatus();
+    if(aStep->GetPostStepPoint()->GetStepStatus()==fGeomBoundary){
+      switch(boundaryStatus){
+      case Detection: 
+	{
+	  //write photon statistics to the event ROOT tree
+	  //	  Tally aTally;
+	  //	  novaTrackInformation* info=((novaTrackInformation*)(aStep->GetTrack()->GetUserInformation()));
+
+
+
+
+	  G4ThreeVector birthpos=info->GetBirthPosition();
+	  aTally.BirthX=birthpos[0]/mm;
+	  aTally.BirthY=birthpos[1]/mm;
+
+	  aTally.BirthZ = birthpos[2]/mm;
+
+	  aTally.BirthLambda=info->GetBirthLambda();
+       	  aTally.DeathLambda=1240*eV/(aStep->GetTrack()->GetTotalEnergy());
+
+	  aTally.DistBefore=info->GetDistBeforeWLS()/mm;
+
+
+	  //       	  aTally.DistAfter=info->GetDistAfterWLS()/mm;
+       	  aTally.DistAfter=my_dist_after;
+
+	  //	  aTally.TotTrackLen = info->GetTotalTrackLength()/mm;
+
+	  aTally.ReflectBeforeWLS=info->GetReflectBeforeWLS();
+	  aTally.ReflectAfterWLS=info->GetReflectAfterWLS();
+
+	  aTally.WLSZ=(aStep->GetTrack()->GetVertexPosition())[2]/mm;
+
+
+	  //	  aTally.DistAfter= aStep->GetTrack()->GetTrackLength()/mm;
+
+
+	  //	  aTally.DistAfter=aTally.DistAfter + aStep->GetTrack()->GetTrackLength()/mm;
+
+	  //	  if (aTally.DistBefore + aTally.DistAfter < 8000){
+	  //	    aTally.TotTrackLen = 0;
+	  //	  }
+	  //	  else{
+	    aTally.TotTrackLen = aTally.DistBefore + aTally.DistAfter + 0.0*aTally.BirthZ;
+	    //	  }
+	  aTally.TotalInternalReflections = info->GetTotalInternalReflections();
+
+	  aTally.WLSCount=info->GetWLSCount();
+	  aTally.PMTnumber=aStep->GetTrack()->GetNextVolume()->GetCopyNo();
+	  CLHEP::Hep3Vector MomDir=aStep->GetTrack()->GetMomentumDirection();
+	  aTally.ExitAngle=atan(sqrt(MomDir[0]*MomDir[0]+MomDir[1]*MomDir[1])/MomDir[2]);
+	  
+	  //The following lines get the exit position from the fiber
+	  
+	  G4ThreeVector ExitPos=aStep->GetPostStepPoint()->GetPosition();
+	  aTally.DeathX = ExitPos[0]/mm;
+	  aTally.DeathY = ExitPos[1]/mm;
+	  aTally.DeathZ = ExitPos[2]/mm;
+	  aTally.DeathR = sqrt(ExitPos[0]*ExitPos[0]+ExitPos[1]*ExitPos[1])/mm;
+
+
+
+
+	  //	  ofstream ExitPosition;
+	  //	  ExitPosition.open("ExitPosition.out",ios::app);
+	  //	  ExitPosition<<ExitPos[0]<<" "<<ExitPos[1]<<" "<<ExitPos[2]<<G4endl;
+	  //	  ExitPosition.close();
+	  
+	  evtac->CountDetected(aTally);
+	}
+	break;
+      case Absorption: 
+	if (theTrack->GetNextVolume()->GetName()!="p_paint")
+	  evtac->CountFailed();
+	else{
+	  evtac->CountAbsorbed();
+	}
+	break;
+      case Undefined: G4cout<<"Undefined Boundary Process!"<<G4endl;
+	break;
+      case NoRINDEX: 
+	{
+	  evtac->CountEscaped();
+	}
+	break;
+      case LambertianReflection: 
+      case LobeReflection:
+      case SpikeReflection:
+	{
+	  ((novaTrackInformation*)(aStep->GetTrack()->GetUserInformation()))->CountReflections();
+	  break;
+}
+      case TotalInternalReflection:
+	{
+	  ((novaTrackInformation*)(aStep->GetTrack()->GetUserInformation()))->CountTotalInternalReflections();
+
+	break;
+	}
+    default: 
+	break;
+      }
+    }
+  }
+  
+}
+

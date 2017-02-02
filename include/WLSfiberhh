@@ -1,0 +1,21 @@
+#ifndef WLSfiber_h
+#define WLSfiber_h
+
+#include "G4LogicalVolume.hh"
+#include "G4Material.hh"
+
+class WLSfiber
+{
+public:
+  WLSfiber();
+  ~WLSfiber();
+  //both of these functions return logical volumes containing core and cladding
+  //creates a straight segement of WLS fiber
+  G4LogicalVolume *BuildStraight(G4double radius,G4double length);
+  //creates a curved segment of WLS fiber
+  G4LogicalVolume *BuildTorus(G4double fibradius,G4double curveradius,G4double deltaphi);
+private:
+  G4Material *CoreMat, *Polystyrene;
+};
+
+#endif
