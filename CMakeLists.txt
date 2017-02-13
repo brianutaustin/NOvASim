@@ -27,20 +27,24 @@ include(${Geant4_USE_FILE})
 # Locate sources and headers for this project
 #
 include_directories(${PROJECT_SOURCE_DIR}/include
-                    /home/dphan/Geant4/cry_v1.7/src
-                    /home/dphan/ROOT/root-v5.34.36-install/include/
+                    /Users/dphan/Workspace/Geant4/cry_v1.7/src
+                    /Users/dphan/Workspace/ROOT/root-v5-34-36-install/include/
                     ${Geant4_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
-file(GLOB headers /home/dphan/Geant4/cry_v1.7/src/*.h)
-file(GLOB headers /home/dphan/ROOT/root-v5.34.36-install/include/*.h)
+file(GLOB headers /Users/dphan/Workspace/Geant4/cry_v1.7/src/*.h)
+file(GLOB headers /Users/dphan/Workspace/ROOT/root-v5-34-36-install/include/*.h)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(nova nova.cc ${sources} ${headers})
-target_link_libraries(nova ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} /home/dphan/Geant4/cry_v1.7/lib/libCRY.a /home/dphan/ROOT/root-v5.34.36-install/lib/libTree.so
-/home/dphan/ROOT/root-v5.34.36-install/lib/libRIO.so)
+target_link_libraries(nova
+${Geant4_LIBRARIES}
+${ROOT_LIBRARIES}
+/Users/dphan/Workspace/Geant4/cry_v1.7/lib/libCRY.a
+/Users/dphan/Workspace/ROOT/root-v5-34-36-install/lib/libTree.so
+/Users/dphan/Workspace/ROOT/root-v5-34-36-install/lib/libRIO.so)
 
 # Dung's old failed test
 #target_link_libraries(LXe ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
