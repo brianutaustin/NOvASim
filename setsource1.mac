@@ -1,0 +1,41 @@
+/gps/particle mu-
+/gps/number 1
+
+#/gps/position 0.0 -2.0 0.0 cm
+
+#plane source of cosmic rays
+/gps/pos/type Plane
+/gps/pos/shape Rectangle
+/gps/pos/centre 0.0 5.0 750.0 cm
+#/gps/pos/centre 0.0 5.0 0.0 cm
+
+/gps/pos/rot1 1 0 0
+/gps/pos/rot2 0 0 1
+#/gps/pos/halfx 2.05 cm
+#/gps/pos/halfy 2.05 cm
+/gps/pos/halfx 1.75 cm
+/gps/pos/halfy 1.75 cm
+/gps/direction 0.0 -1.0 0.0
+
+#plane source of cosmic rays from the side
+#/gps/pos/type Plane
+#/gps/pos/shape Rectangle
+#/gps/pos/centre 0.0 0.0 0.0 cm
+#/gps/pos/rot1 0 1 0
+#/gps/pos/rot2 0 0 1
+#/gps/pos/halfy 2.05 cm
+#/gps/pos/halfz 2.05 cm
+#/gps/direction -1.0 0.0 0.0
+
+
+#/gps/energy .8 MeV
+#cosmic ray muon energy spectrum
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/hist/point 1000 .363
+/gps/hist/point 2000 .162
+/gps/hist/point 3000 .094
+/gps/hist/point 5000 .043
+/gps/hist/point 10000 .011
+/gps/hist/point 20000 .002
+/gps/hist/inter Lin
