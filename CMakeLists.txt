@@ -21,7 +21,7 @@ find_package(ROOT REQUIRED)
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
 #
-include(${Geant4_USE_FILE})
+#include(${Geant4_USE_FILE})
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -44,11 +44,8 @@ ${Geant4_LIBRARIES}
 ${ROOT_LIBRARIES}
 /Users/dphan/Workspace/Geant4/cry_v1.7/lib/libCRY.a
 /Users/dphan/Workspace/ROOT/root-v5-34-36-install/lib/libTree.so
+/Users/dphan/Workspace/ROOT/root-v5-34-36-install/lib/libCore.so
 /Users/dphan/Workspace/ROOT/root-v5-34-36-install/lib/libRIO.so)
-
-# Dung's old failed test
-#target_link_libraries(LXe ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
-#target_link_libraries(LXe /home/dphan/cry_v1.7/lib/libCRY.a)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -56,6 +53,50 @@ ${ROOT_LIBRARIES}
 # relies on these scripts being in the current working directory.
 #
 set(nova_SCRIPTS
+  FiberBulkAbsorb.cfg
+	GraphExit.C
+	NOVA.cfg
+	PMMABulkAbsorb.dat
+	PSTBulkAbsorb.cfg
+	UPS923.cfg
+	WLSabsorbguess.cfg
+	WLSemit.cfg
+	apd_qe_1.dat
+	bad.WLSabsorb.cfg
+	bisMSB_emission.txt
+	fiberPSTabsorb.dat
+	full_popop_emission.cfg
+	graphfromfile.C
+	nova.NOVA.cfg
+	pTP_emission.dat
+	pl_file_1.dat
+	ppo_emission.txt
+	proto.NOVA.cfg
+	qe_file_2.dat
+	rutile.txt
+	scripts/AbsProfile.C
+  scripts/CompRef.C
+  scripts/CompileStats.C
+  scripts/FindAvg.C
+  scripts/PlotEdepStuff.C
+  scripts/Spectrum.C
+  scripts/TGraph.C
+  scripts/ViewSpectrum.C
+  scripts/readpoints.C
+  scripts/reflections.C
+  scripts/runnova.csh
+  scripts/runprototype.csh
+  scripts/runprototype_center.csh
+	setgun.mac
+	setsource.mac
+	setsource1.mac
+	setsource2.mac
+	setsource3.mac
+	setsource4.mac
+	setsource5.mac
+	setsource6.mac
+	setsource7.mac
+	y11_abs_length.dat
 )
 
 foreach(_script ${nova_SCRIPTS})

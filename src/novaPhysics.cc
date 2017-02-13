@@ -104,6 +104,7 @@ void novaPhysics::ConstructProcess()
 //#include "G4MultipleScattering.hh"
 void novaPhysics::ConstructEM()
 {
+  auto theParticleIterator = GetParticleIterator();
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
     G4ParticleDefinition* particle = theParticleIterator->value();
@@ -243,6 +244,7 @@ void novaPhysics::ConstructOp()
   pManager->AddDiscreteProcess(theBoundaryProcess);
   pManager->AddDiscreteProcess(theWLSProcess);
 
+  auto theParticleIterator = GetParticleIterator();
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
     G4ParticleDefinition* particle = theParticleIterator->value();
